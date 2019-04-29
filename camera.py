@@ -9,8 +9,11 @@ user_name = ["admin", "admin", "admin"]
 password = ["cisdi123456", "cisdi123456", "cisdi123456"]
 address = ["192.168.3.102", "192.168.3.102", "192.168.3.102"]
 
+camera_on = False
+
 
 def start_camera(camera_id):
+    global camera_on
     if camera_id == 100:  # 100 for testing PC camera
         cap = cv2.VideoCapture(0)
     else:
@@ -21,7 +24,7 @@ def start_camera(camera_id):
 
     producer = KafkaProducer(bootstrap_servers='47.100.26.79:9092')
     topic = 'video_test'
-    while 1:
+    while camera_on:
         ret, frame = cap.read()
         _, img_encode = cv2.imencode('.jpg', frame)
         str_encode = np.array(img_encode).tostring()
@@ -41,6 +44,7 @@ def start_camera(camera_id):
         # print(future.get())
 
         print(camera_id)  # for debug
+    cap.release()
 
 
 def stop_camera(capture):
