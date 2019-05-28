@@ -29,7 +29,7 @@ class CameraThread(threading.Thread):
         conf = configparser.ConfigParser()
         conf.read('config.ini', encoding='utf-8')
         servers = conf.get('kafka', 'servers')
-        producer = KafkaProducer(bootstrap_servers=servers)
+        # producer = KafkaProducer(bootstrap_servers=servers)
         # Connect to the camera
         cap = self.get_camera(self.camera_id, conf)
         # check if camera is opened
@@ -41,12 +41,17 @@ class CameraThread(threading.Thread):
         # --------------------------
         while not self._stopped():
             if self.in_use:
+                start = time.time()
                 ret, frame = cap.read()
+                end_1 = time.time()
+                print('time for image read {0}'.format(end_1 - start))
                 if ret:
                     # showing the image for testing
                     cv2.imshow(self.topic + str(self.camera_id), cv2.resize(frame, (800, 450)))
                     if cv2.waitKey(5) == 27:
                         break
+                    end_2 = time.time()
+                    print('time for image show {0}'.format(end_2 - end_1))
                     # encode the image and send to Kafka
                     _, img_encode = cv2.imencode('.jpg', frame)
                     img_base64 = base64.b64encode(img_encode)
@@ -58,6 +63,8 @@ class CameraThread(threading.Thread):
                         "data": str(img_base64, 'ASCII')
                     }
                     message = json.dumps(msg_dict).encode('utf-8')
+                    end_3 = time.time()
+                    print('time for encode {0}'.format(end_3 - end_2))
                     # print(message.decode())  # for debug
                     # try:
                     #     producer.send(self.topic, message)
@@ -66,6 +73,10 @@ class CameraThread(threading.Thread):
                 else:
                     logging.warning('Video {0} not available, reconnecting ... '.format(self.camera_id))
                     cap = self.get_camera(self.camera_id, conf)
+                end = time.time()
+                seconds = end - start
+                fps = int(1 / seconds)
+                logging.warning("Estimated frames per second : {0}".format(fps))
         cap.release()
         # cv2.destroyAllWindows()
         cv2.destroyWindow(self.topic + str(self.camera_id))

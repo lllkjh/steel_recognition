@@ -26,7 +26,7 @@ def main():
     next_id = camera_id + 1 if camera_id < cam_num else 1
     next_camera_thread = CameraThread(next_id, 'head', in_use=False)
     next_camera_thread.start()
-    pre_signal = signal
+    # pre_signal = signal
     pre_cam_id = camera_id
     pre_time = time.time()
     while 1:
@@ -61,7 +61,7 @@ def main():
             new_thread = CameraThread(next_id, 'head', in_use=False)
             next_camera_thread.in_use = True
             camera_thread.stop()
-            camera_thread.join()
+            # camera_thread.join()
             camera_thread = next_camera_thread
             next_camera_thread = new_thread
             next_camera_thread.start()
