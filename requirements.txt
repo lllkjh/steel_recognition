@@ -1,0 +1,5 @@
+imutils
+kafka
+opencv-python
+numpy
+python-snap7
